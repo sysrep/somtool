@@ -1,10 +1,15 @@
-<html>
+<!doctype html>
+<html ng-app="somApp">
   <head>
-    <title>React Transform Boilerplate</title>
+    <title>SOM Tool</title>
   </head>
   <body>
-    <div id='root'>
-    </div>
-    <script src="/static/bundle.js"></script>
+
+  <div ng-controller="MainController as main">
+  </div>
+
+    <script src="node_modules/angular/angular.js"></script>
+    <script src="node_modules/angular-ui-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="src/app.js"></script>
   </body>
 </html>
