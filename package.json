@@ -9,6 +9,8 @@
     "angular-ui-bootstrap": "^0.14.2",
     "angular-ui-router": "^0.2.15",
     "bootstrap": "^3.3.5",
+    "cwise": "^1.0.8",
+    "d3": "^3.5.6",
     "font-awesome": "^4.4.0",
     "som.js": "^0.1.0"
   },
