@@ -5,7 +5,11 @@
   "main": "index.html",
   "dependencies": {
     "angular": "^1.4.7",
+    "angular-animate": "^1.4.7",
     "angular-ui-bootstrap": "^0.14.2",
+    "angular-ui-router": "^0.2.15",
+    "bootstrap": "^3.3.5",
+    "font-awesome": "^4.4.0",
     "som.js": "^0.1.0"
   },
   "devDependencies": {
@@ -13,7 +17,11 @@
     "babel-loader": "^5.3.2",
     "babel-runtime": "^5.8.25",
     "css-loader": "^0.20.1",
+    "file-loader": "^0.8.4",
+    "html-loader": "^0.3.0",
+    "html-webpack-plugin": "^1.6.2",
     "style-loader": "^0.12.4",
+    "url-loader": "^0.5.6",
     "webpack": "^1.12.2"
   },
   "scripts": {

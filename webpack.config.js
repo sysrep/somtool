@@ -1,3 +1,6 @@
+var HtmlWebpackPlugin = require('html-webpack-plugin'),
+    webpack = require("webpack");
+
 module.exports = {
     entry: [
         "./src/app.js",
@@ -9,8 +12,18 @@ module.exports = {
     module: {
         loaders: [
             {
+                test: /\.html$/,
+                loader: 'file?name=templates/[name]-[hash:6].html'
+            },
+            {
+                test: [/fontawesome-webfont\.svg/, /fontawesome-webfont\.eot/, /fontawesome-webfont\.woff/, /fontawesome-webfont\.woff2/, /fontawesome-webfont\.ttf/],
+                loader: 'file?name=fonts/[name].[ext]'
+            },
+            {   test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+                loader: 'url-loader?limit=100000'
+            },
+            {
                 test: /\.css$/,
-                exclude: /(node_modules|bower_components)/,
                 loader: "style!css"
             },
             {
@@ -19,5 +32,11 @@ module.exports = {
                 loader: 'babel?optional[]=runtime&stage=0'
             }
         ]
-    }
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            filename: 'index.html',
+            template: './src/html/index.html'
+        }),
+    ]
 };

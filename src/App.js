@@ -1,13 +1,19 @@
+import "../node_modules/bootstrap/dist/css/bootstrap.css"
+import 'font-awesome/css/font-awesome.css';
 import "../src/css/index.css"
 
 import "../node_modules/angular/angular.js"
 import "../node_modules/angular-ui-bootstrap/ui-bootstrap-tpls.js"
+import "../node_modules/angular-ui-router/build/angular-ui-router.js"
 import som from "../node_modules/som.js/dist/som.js"
+
+import { config } from "../src/appConfig.js"
+import { mainController } from "../src/appControllers.js"
+
 
 // webpack-dev-server and
 // go to http://localhost:8080/webpack-dev-server/index.html
 
-angular.module('somApp', [])
-    .controller('MainController', function() {
-        console.log('hello world')
-    });
+angular.module('somTool', ['ui.router'])
+    .config(config)
+    .controller('mainController', mainController)
