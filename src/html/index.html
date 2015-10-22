@@ -12,10 +12,20 @@
 <div class="row">
     <div class="col-lg-4">
         <div id="chart"></div>
-        <md-button class="md-raised" ng-click="pollDataIn(i)" ng-repeat="i in [1,100,200,400,700,900,1000,1500,2000,2500,3000,3500]">{{i}}</md-button>
+        <md-button class="md-raised"
+                   ng-click="pollDataIn(i/10*time)"
+                   ng-repeat="i in generateArray(10)"
+                   ng-if="time">
+            {{i/20*time | floorFilter}}
+        </md-button>
         <br/>
         <br/>
         <md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>
+        <br/>
+        <br/>
+        <br/>
+        <span>{{items}}</span><br/><br/>
+        <span>{{categories}}</span>
     </div>
     <div class="col-lg-8">
         <h1 class="md-title">Matrix</h1>
@@ -65,7 +75,7 @@
                     </div>
 
                     <div layout="=row" ng-repeat="(itemkey, itemvalue) in items">
-                        <md-input-container style="margin-right: 90px;" ng-repeat="(catkey, catvalue) in categories" >
+                        <md-input-container style="margin-right: 113px;" ng-repeat="(catkey, catvalue) in categories" >
                             <label>degree</label>
                             <md-select ng-model="itemvalue['categories'][catkey]['degree']">
                                 <md-option value="1">1</md-option>
@@ -82,15 +92,15 @@
                 </form>
             </div>
             <div class="col-lg-12">
-                <span>{{items}}</span><br/><br/>
-                <span>{{categories}}</span>
+
                 <div layout="row">
                     <md-button class="md-raised md-primary" ng-click="start()">START</md-button>
+                    <md-button ng-click="random()" style="margin-right: 20px;">Random</md-button>
                     <md-button ng-click="clearValue()" ng-disabled="!j" style="margin-right: 20px;">Clear</md-button>
-                    <md-button ng-click="save()" ng-disabled="myForm.$invalid" class="md-primary" layout layout-align="center end">Save</md-button>
+                    <md-button ng-click="save()" class="md-primary" >Save</md-button>
                 </div>
 
-                <span ng-if="j.value && j.name" style="margin-left: 10px;">{{j.name}} is {{j.value}}</span>
+
                 <br/>
             </div>
         </div>

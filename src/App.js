@@ -14,10 +14,12 @@ import "../node_modules/angular-messages/angular-messages.js"
 
 import { config } from "../src/appConfig.js"
 import { mainController } from "../src/appControllers.js"
+import { floorFilter } from "../src/appFilters.js"
 
 // webpack-dev-server and
 // go to http://localhost:8080/webpack-dev-server/index.html
 
 angular.module('somTool', ['ui.router', 'ngAnimate', 'ui.bootstrap', 'ngMaterial', 'ngMessages'])
     .config(config)
+    .filter('floorFilter', floorFilter)
     .controller('mainController', mainController)
