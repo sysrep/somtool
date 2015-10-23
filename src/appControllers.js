@@ -2,7 +2,7 @@ import ndarray from "ndarray"
 import ops from "ndarray-ops"
 import cwise from "cwise"
 import show from 'ndarray-show'
-import unpack from 'ndarray-unpack'
+//import unpack from 'ndarray-unpack'
 import {som} from "../node_modules/som.js/dist/som.js"
 import _ from "underscore"
 import loremIpsum from 'lorem-ipsum'
@@ -355,9 +355,23 @@ export function mainController($scope) {
     }
 
     function getLine (map, dimensionOfMap, lineNumber) {
-        var line = map.hi(dimensionOfMap,lineNumber+1).lo(0,lineNumber)
-        var unpackedLine = unpack(line)
-        return _.flatten(unpackedLine)
+        var line = []
+        for (var i =0; i < dimensionOfMap; i++) {
+            var item = map.get(i,lineNumber)
+            if (item) {
+                line.push(item)
+            } else {
+                line.push(0)
+            }
+
+        }
+        return line
+        //var line = map.hi(dimensionOfMap,lineNumber+1).lo(0,lineNumber)
+        //var unpackedLine = unpack(line)
+        //console.log(line)
+        ////console.log(unpackedLine)
+        //console.log(_.flatten(unpackedLine))
+        //return _.flatten(unpackedLine)
     }
 
     function stringIntoNdarray (string) {
@@ -399,13 +413,13 @@ export function mainController($scope) {
 
     $scope.pollDataIn = function (v) {
         var index = Math.floor(v)
+        var m = $scope.trainedMap.get(index)
+        if (m === undefined) { m = $scope.trainedMap.get(index+1)}
+        if (m === undefined) { m = $scope.trainedMap.get(index+2)}
+        if (m === undefined) { m = $scope.trainedMap.get(index+3)}
+        if (m === undefined) { m = $scope.trainedMap.get(index+4)}
+        if (m === undefined) { m = $scope.trainedMap.get(index+5)}
         d3.selectAll(".hexagon").transition().duration(800).style('fill', function(data,i) {
-            var m = $scope.trainedMap.get(index)
-            if (m === undefined) { m = $scope.trainedMap.get(index+1)}
-            if (m === undefined) { m = $scope.trainedMap.get(index+2)}
-            if (m === undefined) { m = $scope.trainedMap.get(index+3)}
-            if (m === undefined) { m = $scope.trainedMap.get(index+4)}
-            if (m === undefined) { m = $scope.trainedMap.get(index+5)}
             //console.log(m)
             var d = getLine(stringIntoNdarray(m), $scope.dimensionN, i)
             console.log(d)
@@ -490,6 +504,6 @@ export function mainController($scope) {
 
     drawHexGrid($scope.dimensionN, $scope.mapRowsN)
     //setTimeout($scope.random(), 5400);
-
+    //
 
 }

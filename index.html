@@ -15,8 +15,11 @@
 
         <md-button class="md-raised" ng-click="pollDataIn(i)" ng-repeat="i in [1,100,200,400,700,900,1000,1500,2000,2500,3000,3500]">{{i}}</md-button>
         <br/>
-        <br/>
-        <md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>
+
+        <div style="margin-right: 30px; margin-left: 30px;">
+            <md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>
+        </div>
+
     </div>
     <div class="col-lg-8">
         <h1 class="md-title">Matrix</h1>

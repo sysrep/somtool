@@ -12,20 +12,27 @@
 <div class="row">
     <div class="col-lg-4">
         <div id="chart"></div>
+
+        <div style="padding-left:50px; padding-right:170px;">
         <md-button class="md-raised"
                    ng-click="pollDataIn(i/10*time)"
                    ng-repeat="i in generateArray(10)"
                    ng-if="time">
-            {{i/20*time | floorFilter}}
+            {{i/10*time | floorFilter}}
         </md-button>
+        </div>
         <br/>
         <br/>
-        <md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>
+        <md-progress-linear md-mode="determinate" value="{{time}}" style="padding-left:60px; padding-right:190px;"></md-progress-linear>
         <br/>
         <br/>
         <br/>
-        <span>{{items}}</span><br/><br/>
-        <span>{{categories}}</span>
+        <div style="padding-left:60px; padding-right:190px;">
+            <h4>data structure</h4>
+            <span>{{items}}</span><br/><br/>
+            <span>{{categories}}</span>
+        </div>
+
     </div>
     <div class="col-lg-8">
         <h1 class="md-title">Matrix</h1>
@@ -49,7 +56,6 @@
                 </md-input-container>
             </div>
         </div>
-
 
         <div class="row">
             <div class="col-lg-2">
