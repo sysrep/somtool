@@ -32,14 +32,14 @@ export function mainController($scope) {
         };
 
         var margin = {
-            top: 90,
-            right: 300,
-            bottom: 20,
-            left: 90
+            top: 50,
+            right: 0,
+            bottom: 0,
+            left: 50
         };
 
-        var width = 4500;
-        var height = 7500;
+        var width = 3200;
+        var height = 4000;
 
         var MapColumns = dimension
 
@@ -214,23 +214,72 @@ export function mainController($scope) {
         return Array.from(new Array(n), (x,i) => i+1)
     }
 
-    $scope.mapRowsN = 9
+    $scope.getTdWidth = function() {
+        switch (true) {
+            case ($scope.dimensionN > 12):
+                return { 'width': '70px', 'padding': '0 2px 0 1px', 'font-size': '8px'}
+                break
+            case ($scope.dimensionN > 11):
+                return { 'width': '75px', 'padding': '0 1px 0 1px', 'font-size': '8px'}
+                break
+            case ($scope.dimensionN > 10):
+                return { 'width': '80px', 'padding': '0 1px 0 1px', 'font-size': '8px'}
+                break
+            case ($scope.dimensionN > 9):
+                return { 'width': '85px', 'padding': '0 2px 0 2px', 'font-size': '10px'}
+                break
+            case ($scope.dimensionN > 8):
+                return { 'width': '95px', 'padding': '0 6px 0 6px' }
+                break
+            case ($scope.dimensionN > 7):
+                return { 'width': '105px', 'padding': '0 7px 0 7px' }
+                break
+            case ($scope.dimensionN > 6):
+                return { 'width': '120px', 'padding': '0 10px 0 10px' }
+                break
+            case ($scope.dimensionN > 5):
+                return { 'width': '135px', 'padding': '0 10px 0 10px' }
+                break
+            case ($scope.dimensionN > 4):
+                return { 'width': '140px', 'padding': '0 10px 0 10px' }
+                break
+            case ($scope.dimensionN > 3):
+                return { 'width': '150px', 'padding': '0 10px 0 10px' }
+                break
+            case ($scope.dimensionN > 2):
+                return { 'width': '150px', 'padding': '0 10px 0 10px' }
+                break
+            case ($scope.dimensionN > 1):
+                return { 'width': '150px', 'padding': '0 10px 0 10px' }
+                break
+        }
+    }
+
+    $scope.dimensionN = 12
+    $scope.mapRowsN = 10
+
     $scope.items = {}
     $scope.$watch('mapRowsN', function(n,o) {
         if (n != undefined) {
-            for (let i = 0; i < n; i++) {
-                $scope.items[i] = {}
-            }
             if (o>n) {
                 for (let i = n; i < o; i++) {
                     delete $scope.items[i]
                 }
             }
-            drawHexGrid($scope.dimensionN, $scope.mapRowsN)
+            for (let i = 0; i < n; i++) {
+                $scope.items[i] = {}
+            }
         }
     })
-
-    $scope.dimensionN = 6
+    $scope.mapWidth = 12
+    $scope.mapHeight = 18
+    $scope.$watch('mapWidth', function(n,o) {
+        if (n != undefined) drawHexGrid(n, $scope.mapHeight)
+    })
+    $scope.$watch('mapHeight', function(n,o) {
+        if (n != undefined) drawHexGrid($scope.mapWidth, n)
+    })
+    
     $scope.categories = {}
     $scope.$watch('dimensionN', function(n,o) {
         if (n != undefined) {
@@ -242,10 +291,10 @@ export function mainController($scope) {
                     delete $scope.categories[i]
                 }
             }
-            drawHexGrid($scope.dimensionN, $scope.mapRowsN)
+            //drawHexGrid($scope.dimensionN, $scope.mapRowsN)
         }
     })
 
-    drawHexGrid($scope.dimensionN, $scope.mapRowsN)
+
 
 }

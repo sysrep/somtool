@@ -9,107 +9,139 @@
 
 <body ng-app="somTool" ng-controller="mainController as main">
 
-<div class="row">
-    <div class="col-lg-4">
+<div layout="row">
+    <div flex="30">
         <div id="chart"></div>
+        <div style="padding-left:30px;">
+            <div>
+                <!--<md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>-->
+                <div layout="row">
+                    <div flex="35">
+                        <md-input-container>
+                            <label>Width of SOMap</label>
+                            <md-select ng-model="mapWidth">
+                                <md-option ng-repeat="d in generateArray(100)" value="{{d}}">{{d}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <div flex-offset="5" flex="35">
+                        <md-input-container>
+                            <label>Height of SOMap</label>
+                            <md-select ng-model="mapHeight">
+                                <md-option ng-repeat="r in generateArray(100)" value="{{r}}">{{r}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                </div>
 
-        <div style="padding-left:50px; padding-right:170px;">
-        <md-button class="md-raised"
-                   ng-click="pollDataIn(i/10*time)"
-                   ng-repeat="i in generateArray(10)"
-                   ng-if="time">
-            {{i/10*time | floorFilter}}
-        </md-button>
+                <md-progress-circular md-mode="determinate" value="{{time}}" ng-if="time"></md-progress-circular>
+                <div style="padding-top:20px;">
+                    <md-button class="md-raised"
+                               ng-click="pollDataIn(i/10*time)"
+                               ng-repeat="i in generateArray(10)"
+                               ng-if="time"
+                            >
+                        {{i/10*100}} %
+                    </md-button>
+                </div>
+            </div>
+            <!--<div style="padding-left:60px; padding-right:190px;">-->
+            <!--<h4>data structure</h4>-->
+            <!--<span>{{items}}</span><br/><br/>-->
+            <!--<span>{{categories}}</span>-->
+            <!--</div>-->
         </div>
-        <br/>
-        <br/>
-        <md-progress-linear md-mode="determinate" value="{{time}}" style="padding-left:60px; padding-right:190px;"></md-progress-linear>
-        <br/>
-        <br/>
-        <br/>
-        <div style="padding-left:60px; padding-right:190px;">
-            <h4>data structure</h4>
-            <span>{{items}}</span><br/><br/>
-            <span>{{categories}}</span>
-        </div>
-
     </div>
-    <div class="col-lg-8">
-        <h1 class="md-title">Matrix</h1>
-        <p>Please Input Matrix Data</p>
+    <div flex="65">
+        <h1 class="md-title">Data Matrix</h1>
 
-        <div class="row">
-            <div class="col-lg-2">
-                <md-input-container style="margin-right: 10px;">
-                    <label>Number of Categoreis</label>
+        <div layout="row">
+            <div flex="15">
+                <md-input-container>
+                    <label>N of Attribute</label>
                     <md-select ng-model="dimensionN">
                         <md-option ng-repeat="d in generateArray(16)" value="{{d}}">{{d}}</md-option>
                     </md-select>
                 </md-input-container>
             </div>
-            <div class="col-lg-2">
-                <md-input-container style="margin-right: 10px;">
-                    <label>Number of Items</label>
+            <div flex="15" flex-offset="5">
+                <md-input-container>
+                    <label>N of Entities</label>
                     <md-select ng-model="mapRowsN">
-                        <md-option ng-repeat="r in generateArray(100)" value="{{r}}">{{r}}</md-option>
+                        <md-option ng-repeat="r in generateArray(40)" value="{{r}}">{{r}}</md-option>
                     </md-select>
                 </md-input-container>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-2">
-                <div layout="=row">
-                    <md-input-container style="margin-bottom: 50px;">
-                        <label></label>
-                    </md-input-container>
-                </div>
-                <div layout="=row" ng-repeat="(key, value) in items">
-                    <md-input-container>
-                        <label>item {{key}}</label>
-                        <input ng-model="value.name">
-                    </md-input-container>
-                </div>
-            </div>
-            <div class="col-lg-10">
-                <form name="myForm">
-                    <div layout="row">
-                        <md-input-container ng-repeat="(key, value) in categories" style="margin-right: 20px;">
-                            <label>category {{key}}</label>
-                            <input ng-model="categories[key]">
-                        </md-input-container>
-                    </div>
+        <div layout="row">
 
-                    <div layout="=row" ng-repeat="(itemkey, itemvalue) in items">
-                        <md-input-container style="margin-right: 113px;" ng-repeat="(catkey, catvalue) in categories" >
-                            <label>degree</label>
-                            <md-select ng-model="itemvalue['categories'][catkey]['degree']">
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <!--<div class="errors" ng-messages="myForm.categories.$error" ng-if="myForm.$dirty">-->
-                                <!--<div ng-message="required">Required</div>-->
-                            <!--</div>-->
-                        </md-input-container>
-                    </div>
-                </form>
+            <div flex="10">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th ng-repeat="(key, value) in categories">
+                                <md-input-container ng-style="getTdWidth()">
+                                    <label>category {{key}}</label>
+                                    <input ng-model="categories[key]">
+                                </md-input-container>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(itemkey, itemvalue) in items">
+                            <td>
+                                <md-input-container ng-style="getTdWidth()">
+                                    <label>Entity {{itemkey}}</label>
+                                    <input ng-model="itemvalue.name">
+                                </md-input-container>
+                            </td>
+                            <td ng-repeat="(catkey, catvalue) in categories">
+                                <md-input-container ng-style="getTdWidth()">
+                                    <label>degree</label>
+                                    <md-select ng-model="itemvalue['categories'][catkey]['degree']">
+                                        <md-option value="1">1</md-option>
+                                        <md-option value="2">2</md-option>
+                                        <md-option value="3">3</md-option>
+                                        <md-option value="4">4</md-option>
+                                        <md-option value="5">5</md-option>
+                                    </md-select>
+                                </md-input-container>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+        </div>
+
+
+        <div>
+
+        </div>
+
+        <div layout="column">
             <div class="col-lg-12">
-
                 <div layout="row">
                     <md-button class="md-raised md-primary" ng-click="start()">START</md-button>
                     <md-button ng-click="random()" style="margin-right: 20px;">Random</md-button>
                     <md-button ng-click="clearValue()" ng-disabled="!j" style="margin-right: 20px;">Clear</md-button>
                     <md-button ng-click="save()" class="md-primary" >Save</md-button>
                 </div>
-
-
                 <br/>
             </div>
         </div>
+
+    </div>
+
+<div class="row">
+    <div class="col-lg-4">
+
+    </div>
+
+    <div class="col-lg-8">
+
+
 
     </div>
 </div>
