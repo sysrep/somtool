@@ -9,668 +9,155 @@
 
 <body ng-app="somTool" ng-controller="mainController as main">
 
-<div class="row">
-    <div class="col-lg-4">
+<div layout="row">
+    <div flex="30">
+        <span id="statusInPerceptage"></span>
         <div id="chart"></div>
+        <div style="padding-left:30px;">
+            <div>
+                <!--<md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>-->
+                <div layout="row">
+                    <div flex="35">
+                        <md-input-container>
+                            <label>Width of SOMap</label>
+                            <md-select ng-model="mapWidth">
+                                <md-option ng-repeat="d in generateArray(100)" value="{{d}}">{{d}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <div flex-offset="5" flex="35">
+                        <md-input-container>
+                            <label>Height of SOMap</label>
+                            <md-select ng-model="mapHeight">
+                                <md-option ng-repeat="r in generateArray(100)" value="{{r}}">{{r}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                </div>
 
-        <md-button class="md-raised" ng-click="pollDataIn(i)" ng-repeat="i in [1,100,200,400,700,900,1000,1500,2000,2500,3000,3500]">{{i}}</md-button>
-        <br/>
+                <!--<md-progress-circular md-mode="determinate" value="{{statusInPercentage}}" ng-if="statusInPercentage"></md-progress-circular>-->
+                <!--<span>{{statusInPercentage}}</span>-->
+                <div style="padding-top:20px;">
+                    <md-button class="md-raised"
+                               ng-repeat="i in generateArray(10)"
+                               ng-if="statusInPercentage"
+                               ng-click="pollDataIn(i/10*(trainingTimes*numberOfEntities), inputMatrix)"
+                            >
+                        {{i/10*100}} %
+                    </md-button>
+                </div>
 
-        <div style="margin-right: 30px; margin-left: 30px;">
-            <md-progress-linear md-mode="determinate" value="{{time}}"></md-progress-linear>
+            </div>
+            <!--<div style="padding-left:60px; padding-right:190px;">-->
+            <!--<h4>data structure</h4>-->
+            <!--<span>{{entities}}</span><br/><br/>-->
+            <!--<span>{{attributes}}</span>-->
+            <!--</div>-->
+        </div>
+    </div>
+    <div flex="65">
+        <h1 class="md-title">Data Matrix</h1>
+
+        <div layout="row">
+            <div flex="15">
+                <md-input-container>
+                    <label>N of Attribute</label>
+                    <md-select ng-model="numberOfAttributes">
+                        <md-option ng-repeat="d in generateArray(16)" value="{{d}}">{{d}}</md-option>
+                    </md-select>
+                </md-input-container>
+            </div>
+            <div flex="15" flex-offset="5">
+                <md-input-container>
+                    <label>N of Entities</label>
+                    <md-select ng-model="numberOfEntities">
+                        <md-option ng-repeat="r in generateArray(40)" value="{{r}}">{{r}}</md-option>
+                    </md-select>
+                </md-input-container>
+            </div>
+            <div flex="15" flex-offset="5">
+                <md-input-container>
+                    <md-button class="md-raised md-primary" ng-click="start()">START</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button ng-click="random()">Random</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button class="md-warn" ng-click="clearValue()">Clear</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button ng-click="saveSVG()" style="color: #009926;" >Save SVG</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button style="color: #009926;" ng-click="save()">Save Data</md-button>
+                </md-input-container>
+            </div>
+        </div>
+
+        <div layout="row">
+
+            <div flex="10">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th ng-repeat="(key, value) in attributes">
+                                <md-input-container ng-style="getTdWidth()">
+                                    <label>Attribute {{key}}</label>
+                                    <input ng-model="attributes[key]">
+                                </md-input-container>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(entitykey, entityvalue) in entities">
+                            <td>
+                                <md-input-container ng-style="getTdWidth()">
+                                    <label>Entity {{entitykey}}</label>
+                                    <input ng-model="entityvalue.name">
+                                </md-input-container>
+                            </td>
+                            <td ng-repeat="(attrikey, attrivalue) in attributes">
+                                <md-input-container ng-style="getTdWidth()">
+                                    <label>degree</label>
+                                    <md-select ng-model="entityvalue['attributes'][attrikey]['degree']">
+                                        <md-option value="1">1</md-option>
+                                        <md-option value="2">2</md-option>
+                                        <md-option value="3">3</md-option>
+                                        <md-option value="4">4</md-option>
+                                        <md-option value="5">5</md-option>
+                                    </md-select>
+                                </md-input-container>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div>
+
         </div>
 
     </div>
+
+<div class="row">
+    <div class="col-lg-4">
+
+    </div>
+
     <div class="col-lg-8">
-        <h1 class="md-title">Matrix</h1>
-        <p>Please Input Matrix Data</p>
 
-        <md-input-container style="margin-right: 10px;">
-            <label>Size</label>
-            <md-select ng-model="size">
-                <md-option ng-repeat="size in sizes" value="{{size}}">{{size}}</md-option>
-            </md-select>
-        </md-input-container>
 
-        <div class="row">
-            <div class="col-lg-2">
-                <div layout="=row">
-                    <md-input-container style="margin-bottom: 50px;">
-                        <label></label>
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-                <div layout="=row">
-                    <md-input-container>
-                        <label>item</label>
-                        <input ng-model="j.name">
-                    </md-input-container>
-                </div>
-
-            </div>
-            <div class="col-lg-10">
-                <form name="myForm">
-                    <div layout="row">
-                        <md-input-container style="margin-right: 10px;">
-                            <label>Category</label>
-                            <input ng-model="j.name">
-                        </md-input-container>
-                        <md-input-container style="margin-right: 10px;">
-                            <label>Category</label>
-                            <input ng-model="j.name">
-                        </md-input-container>
-                        <md-input-container style="margin-right: 10px;">
-                            <label>Category</label>
-                            <input ng-model="j.name">
-                        </md-input-container>
-                        <md-input-container style="margin-right: 10px;">
-                            <label>Category</label>
-                            <input ng-model="j.name">
-                        </md-input-container>
-                        <md-input-container style="margin-right: 10px;">
-                            <label>Category</label>
-                            <input ng-model="j.name">
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-
-                    <div layout="=row">
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                        <md-input-container style="margin-right: 90px;">
-                            <label>Degree</label>
-                            <md-select name="j.value" ng-model="j.value" required>
-                                <md-option value="1">1</md-option>
-                                <md-option value="2">2</md-option>
-                                <md-option value="3">3</md-option>
-                                <md-option value="4">4</md-option>
-                                <md-option value="5">5</md-option>
-                            </md-select>
-                            <div class="errors" ng-messages="myForm.j.$error" ng-if="myForm.$dirty">
-                                <div ng-message="required">Required</div>
-                            </div>
-                        </md-input-container>
-                    </div>
-                </form>
-            </div>
-            <div class="col-lg-12">
-                <div layout="row">
-
-                    <md-button class="md-raised md-primary" ng-click="start()">START</md-button>
-                    <md-button ng-click="clearValue()" ng-disabled="!j" style="margin-right: 20px;">Clear</md-button>
-                    <md-button ng-click="save()" ng-disabled="myForm.$invalid" class="md-primary" layout layout-align="center end">Save</md-button>
-                </div>
-
-                <span ng-if="j.value && j.name" style="margin-left: 10px;">{{j.name}} is {{j.value}}</span>
-                <br/>
-            </div>
-        </div>
 
     </div>
 </div>

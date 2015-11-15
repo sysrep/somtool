@@ -12,6 +12,7 @@ import "../src/d3.hexbin.js"
 
 import randomColor from "randomcolor"
 import filesaver from 'browser-filesaver'
+import $ from 'jquery'
 
 export function mainController($scope) {
 
@@ -38,10 +39,10 @@ export function mainController($scope) {
             left: 50
         };
 
+        var MapColumns = dimension
+
         var width = 3200;
         var height = 4000;
-
-        var MapColumns = dimension
 
         var hexRadius = d3.min([
             width/((MapColumns + 0.5) * Math.sqrt(3)),
@@ -69,7 +70,7 @@ export function mainController($scope) {
 
         var svg = d3.select("#chart").append("svg")
             .attr("id", "hexsvg")
-            .attr("width", width + margin.left + margin.right)
+            .attr("width", width + margin.left + margin.right + 5)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -85,15 +86,16 @@ export function mainController($scope) {
                 return "M" + d.x + "," + d.y + hexbin.hexagon();
             })
             .attr("stroke", function () {
-                return "#fff";
+                //return randomColor({hue: 'blue', count: points.length})[i]
+                return 'rgba(0,0,0,0.4)'
             })
             .attr("fill", function(data,i) {
                 //var mapZero = stringIntoNdarray(trainedMap.get(0))
                 //var d = getLine(mapZero, dimension, i)
                 //return 'rgb(' + Math.floor(255*d[0]) + ',' + Math.floor(255*d[1]) + ',' + Math.floor(255*d[2]) + ')'
-                return randomColor({hue: 'blue', count: points.length})[i]
+                return 'white'
             })
-            .attr("stroke-width", "3px")
+            .attr("stroke-width", "0.5px")
             .on("mouseover", mover)
             .on("mouseout", mout)
     }
@@ -104,6 +106,7 @@ export function mainController($scope) {
             var item = map.get(i,lineNumber)
             if (item) {
                 line.push(item)
+                //break
             } else {
                 line.push(0)
             }
@@ -121,54 +124,182 @@ export function mainController($scope) {
     function stringIntoNdarray (string) {
         if (string != undefined) {
             var o = _.values(JSON.parse(string))
-            var n = ndarray(new Float32Array(o), [$scope.dimensionN, $scope.mapRowsN])
+            var n = ndarray(new Float32Array(o), [$scope.numberOfAttributes, $scope.numberOfEntities])
             return n
         }
     }
 
+    function forceRedraw(element){
+        var disp = element.style.display;
+        element.style.display = 'none';
+        var trick = element.offsetHeight;
+        element.style.display = disp;
+    };
+
     $scope.start = function () {
+        d3.select('#statusInPerceptage').text('')
+        d3.select('#statusInPerceptage').text('somap processing')
         $scope.time = 0
         $scope.trainedMap = {}
-        function trackStatus (map, time) {
-            $scope.time = time
-        }
+
         var inputArray = (function() {
-            var tempArray = _.map(_.values($scope.items), function(i) {
-                    if (i.categories) {
-                        var degrees = _.map(_.values(i.categories), function(j) {
+            var tempArray = _.map(_.values($scope.entities), function(i) {
+                    if (i.attributes) {
+                        var degrees = _.map(_.values(i.attributes), function(j) {
 
                             if (j.degree) {
                                 return (j.degree/5)
                             } else { return null}
                         })
                         return degrees
-                    } else { return []}
+                    } else {return []}
                 })
             return tempArray
         }());
-        //console.log(inputArray)
-        var inputVector = ndarray(new Float32Array(_.flatten(inputArray)), [$scope.dimensionN, $scope.mapRowsN])
+        $scope.inputMatrix = inputArray
+
+        let inputVector = ndarray(new Float32Array(_.flatten(inputArray)), [$scope.numberOfAttributes, $scope.numberOfEntities])
         //ops.random(inputVector)
-        var M = ndarray(new Float32Array($scope.dimensionN*$scope.mapRowsN), [$scope.dimensionN, $scope.mapRowsN])
+        let M = ndarray(new Float32Array($scope.mapWidth*$scope.mapHeight*$scope.numberOfAttributes), [$scope.numberOfAttributes, $scope.mapWidth*$scope.mapHeight])
         ops.random(M)
-        var trainingTimes = 5;
-        $scope.trainedMap = som(M, inputVector, trainingTimes, trackStatus)
+        $scope.trainingTimes = 120
+        $scope.statusInPercentage = 0
+        function trackStatus (map, time) {
+
+            var statusInPerceptage = time/(inputArray.length*$scope.trainingTimes)*100
+            if (statusInPerceptage === 100) {
+                d3.select('#statusInPerceptage').text('done!')
+                $scope.statusInPercentage = statusInPerceptage
+                //forceRedraw()
+                //document.getElementById('statusInPerceptage').style.display = 'none';
+                //document.getElementById('statusInPerceptage').offsetHeight
+                //document.getElementById('statusInPerceptage').style.display = '';
+            }
+
+
+            //console.log($scope.statusInPercentage)
+        }
+
+        $scope.trainedMap = som(M, inputVector, $scope.trainingTimes, trackStatus)
+        $scope.pollDataIn(1, $scope.inputMatrix)
     }
 
-    $scope.pollDataIn = function (v) {
+    var ndarrayDistance = cwise({
+        args: ["array", "array"],
+        pre: function(shape) {
+            this.d = 0
+        },
+        body: function(a1, a2) {
+            this.d = this.d + Math.abs((a1-a2)*(a1-a2))
+        },
+        post: function() {
+            return Math.sqrt(this.d)
+        }
+    })
+
+    $scope.pollDataIn = function (v, inputMatrix) {
+        //console.log(v)
         var index = Math.floor(v)
         var m = $scope.trainedMap.get(index)
-        if (m === undefined) { m = $scope.trainedMap.get(index+1)}
-        if (m === undefined) { m = $scope.trainedMap.get(index+2)}
-        if (m === undefined) { m = $scope.trainedMap.get(index+3)}
-        if (m === undefined) { m = $scope.trainedMap.get(index+4)}
-        if (m === undefined) { m = $scope.trainedMap.get(index+5)}
-        d3.selectAll(".hexagon").transition().duration(800).style('fill', function(data,i) {
-            //console.log(m)
-            var d = getLine(stringIntoNdarray(m), $scope.dimensionN, i)
-            console.log(d)
-            return 'rgb(' + Math.floor(255*d[0]) + ',' + Math.floor(255*d[1]) + ',' + Math.floor(255*d[2]) + ')'
-        })
+        //if (m === undefined) { console.log('time of somap has something wrong')}
+        //console.log(m)
+        var width = 3200;
+        var height = 4000;
+
+        var hexRadius = d3.min([
+            width/(($scope.mapWidth + 0.5) * Math.sqrt(3)),
+            height/(($scope.mapHeight + 1/3) * 1.5)
+        ]);
+        var hexbin = d3.hexbin().radius(hexRadius);
+        var points = []
+        for (var i = 0; i < $scope.mapHeight; i++) {
+            for (var j = 0; j < $scope.mapWidth; j++) {
+                points.push([
+                    hexRadius * j * 1.75,
+                    hexRadius * i * 1.5
+                ]);
+            }
+        }
+        var hexedPos = hexbin(points)
+
+        if (d3.select(".hexagontext").parentNode) {
+            d3.select(".hexagontext").parentNode.remove()
+        }
+
+        d3.select("#hexsvg").append("g")
+            .attr("transform", "translate(" + 42 + "," + 45 + ")")
+            .selectAll("hexagontext")
+            .data(function(){
+                return hexedPos
+            })
+            .enter().append("text")
+            .attr("x", function (d) {
+                return d.x
+            }).attr("y", function (d) {
+                return d.y + hexRadius/2
+            })
+            .attr('fill', 'black')
+            .attr('class', function(d, i) {
+                return 'hexagontext hexagontext' + i
+            })
+            .attr('font-size', 6)
+            .on('mouseover',function (d, i){
+                d3.select(this).attr("font-size", "12");
+            })
+            .on('mouseout',function (d, i){
+                d3.select(this).attr("font-size", "6");
+            })
+
+        d3.selectAll('.hexagontext').text('')
+        var inputNdarray = ndarray(new Float32Array(_.flatten(inputMatrix)), [$scope.numberOfAttributes, $scope.numberOfEntities])
+        //var trainedSomap = ndarray(new Float32Array(m), [$scope.numberOfAttributes, $scope.mapWidth*$scope.mapHeight])
+
+        for (let ii = 0; ii < $scope.numberOfEntities; ii++) {
+            //line 1 -> m = M.hi(2,1).lo(0,0); line 2 -> m = M.hi(2,2).lo(0,1)
+            var inputNdarrayUnit = inputNdarray.hi($scope.numberOfAttributes, ii + 1).lo(0, ii)
+            let Q = ndarray(new Float32Array($scope.mapWidth*$scope.mapHeight), [1, $scope.mapWidth*$scope.mapHeight])
+
+            for (let jj = 0; jj < $scope.mapWidth*$scope.mapHeight; jj++) {
+                let mapUnit = ndarray(new Float32Array(getLine(stringIntoNdarray(m), $scope.numberOfAttributes, jj)), [parseFloat($scope.numberOfAttributes), 1])
+                let d = ndarrayDistance(inputNdarrayUnit, mapUnit)
+                Q.set(0, jj, d)
+            }
+            let closetMapUnit = ops.argmin(Q)[1]
+            let selector = '.hexagontext' + closetMapUnit
+            //console.log(selector)
+
+            d3.select(selector).text(function(){
+                console.log('text changed')
+                var otherData = d3.select(this).text()
+                if (otherData) {
+                    return otherData + ' + ' + $scope.entities[ii].name
+                } else {
+                    return $scope.entities[ii].name
+                }
+
+            })
+        }
+        //d3.selectAll(".hexagontext").text(function(data,index) {
+        //        //console.log(m)
+        //        var Q = ndarray(new Float32Array($scope.numberOfEntities), [1, $scope.numberOfEntities])
+        //
+        //        var mapUnit = ndarray(new Float32Array(getLine(stringIntoNdarray(m), $scope.numberOfAttributes, index)), [parseFloat($scope.numberOfAttributes), 1])
+        //        //console.log('----mapUnit---')
+        //        //console.log(show(mapUnit))
+        //        //console.log(mapUnit.shape)
+        //        for (var i = 0; i < $scope.numberOfEntities; i++) {
+        //            //line 1 -> m = M.hi(2,1).lo(0,0); line 2 -> m = M.hi(2,2).lo(0,1)
+        //            var inputNdarrayUnit = inputNdarray.hi($scope.numberOfAttributes, i + 1).lo(0, i)
+        //            //console.log(inputNdarrayUnit.shape)
+        //            //console.log('----inputNdarrayUnit---')
+        //            //console.log(show(inputNdarrayUnit))
+        //            var d = ndarrayDistance(inputNdarrayUnit, mapUnit);
+        //            Q.set(0, i, d)
+        //        }
+        //        var closestInputDataIndex = ops.argmin(Q)[1]
+        //        return $scope.entities[closestInputDataIndex].name
+        //    //return 'rgb(' + Math.floor(255*d[0]) + ',' + Math.floor(255*d[1]) + ',' + Math.floor(255*d[2]) + ')'
+        //})
 
     }
 
@@ -177,22 +308,22 @@ export function mainController($scope) {
     };
 
     $scope.random = function() {
-        for (let i = 0; i < $scope.dimensionN ; i++) {
-            $scope.categories[i] = loremIpsum({
+        for (let i = 0; i < $scope.numberOfAttributes ; i++) {
+            $scope.attributes[i] = loremIpsum({
                 count: 1                      // Number of words, sentences, or paragraphs to generate.
                 , units: 'words'            // Generate words, sentences, or paragraphs.
             });
         }
 
-        $scope.item = _.map(_.values($scope.items), function(i) {
-            i['categories'] = {}
+        $scope.entities = _.map(_.values($scope.entities), function(i) {
+            i['attributes'] = {}
             i['name'] = loremIpsum({
                 count: 1                      // Number of words, sentences, or paragraphs to generate.
                 , units: 'words'            // Generate words, sentences, or paragraphs.
             });
-            for (let j = 0; j < $scope.dimensionN ; j++) {
-                i.categories[j] = {}
-                i.categories[j]['degree'] = Math.floor(Math.random() * 5) + 1
+            for (let j = 0; j < $scope.numberOfAttributes ; j++) {
+                i.attributes[j] = {}
+                i.attributes[j]['degree'] = Math.floor(Math.random() * 5) + 1
 
             }
             return i
@@ -200,13 +331,10 @@ export function mainController($scope) {
 
     }
 
-    $scope.save = function() {
-        //alert('Form was valid!');
+    $scope.saveSVG = function() {
         document.getElementById("hexsvg").setAttribute('version', '1.1')
         document.getElementById("hexsvg").setAttribute('xmlns', 'http://www.w3.org/2000/svg')
         var svg = new Blob([document.getElementById("hexsvg").parentNode.innerHTML], {type:"application/svg+xml"})
-        //console.log(saveAs)
-        //console.log(FileSaver)
         filesaver.saveAs(svg, "som.svg")
     };
 
@@ -216,58 +344,54 @@ export function mainController($scope) {
 
     $scope.getTdWidth = function() {
         switch (true) {
-            case ($scope.dimensionN > 12):
+            case ($scope.numberOfAttributes > 12):
                 return { 'width': '70px', 'padding': '0 2px 0 1px', 'font-size': '8px'}
                 break
-            case ($scope.dimensionN > 11):
+            case ($scope.numberOfAttributes > 11):
                 return { 'width': '75px', 'padding': '0 1px 0 1px', 'font-size': '8px'}
                 break
-            case ($scope.dimensionN > 10):
+            case ($scope.numberOfAttributes > 10):
                 return { 'width': '80px', 'padding': '0 1px 0 1px', 'font-size': '8px'}
                 break
-            case ($scope.dimensionN > 9):
+            case ($scope.numberOfAttributes > 9):
                 return { 'width': '85px', 'padding': '0 2px 0 2px', 'font-size': '10px'}
                 break
-            case ($scope.dimensionN > 8):
+            case ($scope.numberOfAttributes > 8):
                 return { 'width': '95px', 'padding': '0 6px 0 6px' }
                 break
-            case ($scope.dimensionN > 7):
+            case ($scope.numberOfAttributes > 7):
                 return { 'width': '105px', 'padding': '0 7px 0 7px' }
                 break
-            case ($scope.dimensionN > 6):
+            case ($scope.numberOfAttributes > 6):
                 return { 'width': '120px', 'padding': '0 10px 0 10px' }
                 break
-            case ($scope.dimensionN > 5):
+            case ($scope.numberOfAttributes > 5):
                 return { 'width': '135px', 'padding': '0 10px 0 10px' }
                 break
-            case ($scope.dimensionN > 4):
+            case ($scope.numberOfAttributes > 4):
                 return { 'width': '140px', 'padding': '0 10px 0 10px' }
                 break
-            case ($scope.dimensionN > 3):
+            case ($scope.numberOfAttributes > 3):
                 return { 'width': '150px', 'padding': '0 10px 0 10px' }
                 break
-            case ($scope.dimensionN > 2):
+            case ($scope.numberOfAttributes > 2):
                 return { 'width': '150px', 'padding': '0 10px 0 10px' }
                 break
-            case ($scope.dimensionN > 1):
+            case ($scope.numberOfAttributes > 1):
                 return { 'width': '150px', 'padding': '0 10px 0 10px' }
                 break
         }
     }
 
-    $scope.dimensionN = 12
-    $scope.mapRowsN = 10
+    $scope.numberOfAttributes = 12
+    $scope.numberOfEntities = 20
 
-    $scope.items = {}
-    $scope.$watch('mapRowsN', function(n,o) {
+    $scope.entities = {}
+    $scope.$watch('numberOfEntities', function(n,o) {
         if (n != undefined) {
-            if (o>n) {
-                for (let i = n; i < o; i++) {
-                    delete $scope.items[i]
-                }
-            }
+            $scope.entities = {}
             for (let i = 0; i < n; i++) {
-                $scope.items[i] = {}
+                $scope.entities[i] = {}
             }
         }
     })
@@ -279,19 +403,15 @@ export function mainController($scope) {
     $scope.$watch('mapHeight', function(n,o) {
         if (n != undefined) drawHexGrid($scope.mapWidth, n)
     })
-    
-    $scope.categories = {}
-    $scope.$watch('dimensionN', function(n,o) {
+
+    $scope.attributes = {}
+    $scope.$watch('numberOfAttributes', function(n,o) {
         if (n != undefined) {
+            $scope.attributes = {}
             for (let i = 0; i < n; i++) {
-                $scope.categories[i] = ''
+                $scope.attributes[i] = ''
             }
-            if (o>n) {
-                for (let i = n; i < o; i++) {
-                    delete $scope.categories[i]
-                }
-            }
-            //drawHexGrid($scope.dimensionN, $scope.mapRowsN)
+            //drawHexGrid($scope.numberOfAttributes, $scope.numberOfEntities)
         }
     })
 

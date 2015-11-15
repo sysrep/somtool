@@ -11,6 +11,7 @@
 
 <div layout="row">
     <div flex="30">
+        <span id="statusInPerceptage"></span>
         <div id="chart"></div>
         <div style="padding-left:30px;">
             <div>
@@ -34,21 +35,23 @@
                     </div>
                 </div>
 
-                <md-progress-circular md-mode="determinate" value="{{time}}" ng-if="time"></md-progress-circular>
+                <!--<md-progress-circular md-mode="determinate" value="{{statusInPercentage}}" ng-if="statusInPercentage"></md-progress-circular>-->
+                <!--<span>{{statusInPercentage}}</span>-->
                 <div style="padding-top:20px;">
                     <md-button class="md-raised"
-                               ng-click="pollDataIn(i/10*time)"
                                ng-repeat="i in generateArray(10)"
-                               ng-if="time"
+                               ng-if="statusInPercentage"
+                               ng-click="pollDataIn(i/10*(trainingTimes*numberOfEntities), inputMatrix)"
                             >
                         {{i/10*100}} %
                     </md-button>
                 </div>
+
             </div>
             <!--<div style="padding-left:60px; padding-right:190px;">-->
             <!--<h4>data structure</h4>-->
-            <!--<span>{{items}}</span><br/><br/>-->
-            <!--<span>{{categories}}</span>-->
+            <!--<span>{{entities}}</span><br/><br/>-->
+            <!--<span>{{attributes}}</span>-->
             <!--</div>-->
         </div>
     </div>
@@ -59,7 +62,7 @@
             <div flex="15">
                 <md-input-container>
                     <label>N of Attribute</label>
-                    <md-select ng-model="dimensionN">
+                    <md-select ng-model="numberOfAttributes">
                         <md-option ng-repeat="d in generateArray(16)" value="{{d}}">{{d}}</md-option>
                     </md-select>
                 </md-input-container>
@@ -67,9 +70,34 @@
             <div flex="15" flex-offset="5">
                 <md-input-container>
                     <label>N of Entities</label>
-                    <md-select ng-model="mapRowsN">
+                    <md-select ng-model="numberOfEntities">
                         <md-option ng-repeat="r in generateArray(40)" value="{{r}}">{{r}}</md-option>
                     </md-select>
+                </md-input-container>
+            </div>
+            <div flex="15" flex-offset="5">
+                <md-input-container>
+                    <md-button class="md-raised md-primary" ng-click="start()">START</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button ng-click="random()">Random</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button class="md-warn" ng-click="clearValue()">Clear</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button ng-click="saveSVG()" style="color: #009926;" >Save SVG</md-button>
+                </md-input-container>
+            </div>
+            <div flex="10" >
+                <md-input-container>
+                    <md-button style="color: #009926;" ng-click="save()">Save Data</md-button>
                 </md-input-container>
             </div>
         </div>
@@ -81,26 +109,26 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th ng-repeat="(key, value) in categories">
+                            <th ng-repeat="(key, value) in attributes">
                                 <md-input-container ng-style="getTdWidth()">
-                                    <label>category {{key}}</label>
-                                    <input ng-model="categories[key]">
+                                    <label>Attribute {{key}}</label>
+                                    <input ng-model="attributes[key]">
                                 </md-input-container>
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="(itemkey, itemvalue) in items">
+                        <tr ng-repeat="(entitykey, entityvalue) in entities">
                             <td>
                                 <md-input-container ng-style="getTdWidth()">
-                                    <label>Entity {{itemkey}}</label>
-                                    <input ng-model="itemvalue.name">
+                                    <label>Entity {{entitykey}}</label>
+                                    <input ng-model="entityvalue.name">
                                 </md-input-container>
                             </td>
-                            <td ng-repeat="(catkey, catvalue) in categories">
+                            <td ng-repeat="(attrikey, attrivalue) in attributes">
                                 <md-input-container ng-style="getTdWidth()">
                                     <label>degree</label>
-                                    <md-select ng-model="itemvalue['categories'][catkey]['degree']">
+                                    <md-select ng-model="entityvalue['attributes'][attrikey]['degree']">
                                         <md-option value="1">1</md-option>
                                         <md-option value="2">2</md-option>
                                         <md-option value="3">3</md-option>
@@ -118,18 +146,6 @@
 
         <div>
 
-        </div>
-
-        <div layout="column">
-            <div class="col-lg-12">
-                <div layout="row">
-                    <md-button class="md-raised md-primary" ng-click="start()">START</md-button>
-                    <md-button ng-click="random()" style="margin-right: 20px;">Random</md-button>
-                    <md-button ng-click="clearValue()" ng-disabled="!j" style="margin-right: 20px;">Clear</md-button>
-                    <md-button ng-click="save()" class="md-primary" >Save</md-button>
-                </div>
-                <br/>
-            </div>
         </div>
 
     </div>
