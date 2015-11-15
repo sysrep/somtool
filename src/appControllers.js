@@ -304,7 +304,19 @@ export function mainController($scope) {
     }
 
     $scope.clearValue = function() {
-        //$scope.myModel = undefined;
+        for (let i = 0; i < $scope.numberOfAttributes ; i++) {
+            $scope.attributes[i] = ''
+        }
+
+        $scope.entities = _.map(_.values($scope.entities), function(i) {
+            i['attributes'] = {}
+            i['name'] = ''
+            for (let j = 0; j < $scope.numberOfAttributes ; j++) {
+                i.attributes[j] = {}
+                i.attributes[j]['degree'] = null
+            }
+            return i
+        })
     };
 
     $scope.random = function() {
