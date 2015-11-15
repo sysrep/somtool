@@ -338,6 +338,14 @@ export function mainController($scope) {
         filesaver.saveAs(svg, "som.svg")
     };
 
+    $scope.saveJSON = function() {
+        var matrixData = {}
+        matrixData.attributes = angular.copy($scope.attributes)
+        matrixData.entities = angular.copy($scope.entities)
+        var json = new Blob([JSON.stringify(matrixData)], {type:"application/json"})
+        filesaver.saveAs(json, "matrix.json")
+    }
+
     $scope.generateArray = function(n) {
         return Array.from(new Array(n), (x,i) => i+1)
     }
