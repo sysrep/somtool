@@ -38,11 +38,13 @@ module.exports = {
             filename: 'index.html',
             template: './src/html/index.html'
         }),
-        //new webpack.optimize.DedupePlugin(),
-        //new webpack.optimize.UglifyJsPlugin({
-        //    compress: {
-        //        warnings: false
-        //    }
-        //})
+        new webpack.optimize.DedupePlugin(),
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            },
+            sourceMap: true,
+            mangle: false
+        })
     ]
 };
